@@ -2094,7 +2094,7 @@
     </div>
     <div id="link-modal" class="fixed inset-0 z-[60] hidden"><div class="absolute inset-0 bg-black/40 backdrop-blur-sm" id="link-modal-overlay"></div><div class="absolute inset-0 flex items-center justify-center p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10"><div class="px-5 py-4 border-b border-slate-100"><h3 class="text-lg font-bold text-slate-800">Adicionar Link</h3></div><div class="px-5 py-4 space-y-3"><div><label class="block text-sm font-medium text-slate-600 mb-1">URL</label><input type="url" id="link-url" placeholder="https://..." class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></div><div><label class="block text-sm font-medium text-slate-600 mb-1">Título</label><input type="text" id="link-title" placeholder="Título..." class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></div><div><label class="block text-sm font-medium text-slate-600 mb-1">Descrição</label><textarea id="link-description" placeholder="Breve descrição..." rows="2" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea></div></div><div class="flex justify-end gap-2 px-5 py-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl"><button id="btn-link-cancel" class="px-4 py-2 text-sm text-slate-500 rounded-lg hover:bg-slate-100 transition">Cancelar</button><button id="btn-link-save" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">Adicionar</button></div></div></div></div>
     <div id="privacy-modal" class="fixed inset-0 z-[60] hidden"><div class="absolute inset-0 bg-black/40 backdrop-blur-sm" id="privacy-modal-overlay"></div><div class="absolute inset-0 flex items-center justify-center p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto relative z-10"><div class="px-6 py-5 border-b border-slate-100 sticky top-0 bg-white rounded-t-2xl flex items-center justify-between"><h3 class="text-lg font-bold text-slate-800">Privacidade e LGPD</h3><button id="btn-close-privacy" class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><div class="px-6 py-5 space-y-4 text-sm text-slate-600 leading-relaxed"><div class="flex items-start gap-3 p-3 bg-green-50 rounded-xl"><svg class="w-5 h-5 text-green-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg><div><strong class="text-green-800">Seus dados nunca saem do seu dispositivo</strong><p class="text-green-700 mt-1">Utilizamos armazenamento local (IndexedDB).</p></div></div><h4 class="font-semibold text-slate-800">Conformidade com a LGPD</h4><ul class="space-y-2 list-disc list-inside"><li><strong>Armazenamento local:</strong> Todos os dados ficam no navegador.</li><li><strong>Controle total:</strong> Exporte ou exclua seus dados a qualquer momento.</li><li><strong>Finalidade:</strong> Dados usados exclusivamente para funcionamento da app.</li></ul></div></div></div></div>
-    <div id="export-modal" class="fixed inset-0 z-[60] hidden"><div class="absolute inset-0 bg-black/40 backdrop-blur-sm" id="export-modal-overlay"></div><div class="absolute inset-0 flex items-center justify-center p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10"><div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between"><h3 class="text-lg font-bold text-slate-800">Exportar / Importar</h3><button id="btn-close-export" class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><div id="storage-quota-box" class="px-6 pt-4 hidden"><div class="flex items-center justify-between text-xs mb-1.5" style="color:var(--ink-muted);"><span>Espaço usado neste navegador</span><span id="storage-quota-text" style="font-weight:700;color:var(--ink);"></span></div><div style="height:6px;border-radius:100px;background:var(--cream-warm);overflow:hidden;"><div id="storage-quota-bar" style="height:100%;border-radius:100px;background:var(--amber);width:0%;transition:width .4s ease;"></div></div><p id="storage-quota-warning" class="hidden" style="font-size:.75rem;color:var(--rose);margin-top:.5rem;line-height:1.5;"></p></div><div class="px-6 py-5 space-y-4"><button id="btn-export-json" class="w-full p-4 bg-slate-50 hover:bg-slate-100 rounded-xl text-left transition flex items-center gap-4"><div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><div><p class="font-medium text-slate-800">Exportar como JSON</p><p class="text-xs text-slate-500">Baixe todas as anotações</p></div></button><button id="btn-import-json" class="w-full p-4 bg-slate-50 hover:bg-slate-100 rounded-xl text-left transition flex items-center gap-4"><div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg></div><div><p class="font-medium text-slate-800">Importar JSON</p><p class="text-xs text-slate-500">Restaurar de um backup</p></div></button><hr class="border-slate-200"><button id="btn-delete-all" class="w-full p-4 bg-red-50 hover:bg-red-100 rounded-xl text-left transition flex items-center gap-4"><div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></div><div><p class="font-medium text-red-800">Excluir todos os dados</p><p class="text-xs text-red-500">Irreversível</p></div></button></div><input type="file" id="import-file-input" accept=".json" class="hidden"></div></div></div>
+    <div id="export-modal" class="fixed inset-0 z-[60] hidden"><div class="absolute inset-0 bg-black/40 backdrop-blur-sm" id="export-modal-overlay"></div><div class="absolute inset-0 flex items-center justify-center p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative z-10"><div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between"><h3 class="text-lg font-bold text-slate-800">Exportar / Importar</h3><button id="btn-close-export" class="p-1 rounded-lg hover:bg-slate-100 text-slate-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button></div><div id="storage-quota-box" class="px-6 pt-4 hidden"><div class="flex items-center justify-between text-xs mb-1.5" style="color:var(--ink-muted);"><span>Espaço usado neste navegador</span><span id="storage-quota-text" style="font-weight:700;color:var(--ink);"></span></div><div style="height:6px;border-radius:100px;background:var(--cream-warm);overflow:hidden;"><div id="storage-quota-bar" style="height:100%;border-radius:100px;background:var(--amber);width:0%;transition:width .4s ease;"></div></div><p id="storage-quota-warning" class="hidden" style="font-size:.75rem;color:var(--rose);margin-top:.5rem;line-height:1.5;"></p></div><div class="px-6 py-5 space-y-4"><button id="btn-export-json" class="w-full p-4 bg-slate-50 hover:bg-slate-100 rounded-xl text-left transition flex items-center gap-4"><div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div><div><p class="font-medium text-slate-800">Exportar como JSON</p><p class="text-xs text-slate-500">Baixe todas as anotações</p></div></button><button id="btn-import-json" class="w-full p-4 bg-slate-50 hover:bg-slate-100 rounded-xl text-left transition flex items-center gap-4"><div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg></div><div><p class="font-medium text-slate-800">Importar JSON</p><p class="text-xs text-slate-500">Restaurar de um backup</p></div></button><div id="cloud-backup-box" class="rounded-xl p-4" style="background:var(--cream-warm);border:1px solid rgba(44,30,74,.08);"><div class="flex items-center gap-2 mb-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--indigo);"><path stroke-linecap="round" stroke-linejoin="round" d="M20 16.2A4.5 4.5 0 0017.5 8h-1.8A7 7 0 104 14.9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 12v9m0 0l-3-3m3 3l3-3"/></svg><p class="font-medium" style="color:var(--ink);font-family:var(--font-display);">Backup no Google Drive</p></div><p id="cloud-backup-status" class="text-xs" style="color:var(--ink-muted);">Guarde uma cópia das suas memórias na sua própria conta Google — os dados vão direto para lá, nunca passam pelos nossos servidores.</p><div id="cloud-backup-disconnected" class="mt-3"><button id="btn-drive-connect" class="w-full px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition" style="background:var(--indigo);">Conectar Google Drive</button></div><div id="cloud-backup-connected" class="hidden mt-3 flex items-center gap-2"><button id="btn-drive-backup-now" class="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition" style="background:var(--amber);">Fazer backup agora</button><button id="btn-drive-disconnect" class="px-3 py-2.5 rounded-lg text-xs font-medium transition" style="color:var(--ink-muted);border:1px solid rgba(44,30,74,.15);">Desconectar</button></div></div><hr class="border-slate-200"><button id="btn-delete-all" class="w-full p-4 bg-red-50 hover:bg-red-100 rounded-xl text-left transition flex items-center gap-4"><div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></div><div><p class="font-medium text-red-800">Excluir todos os dados</p><p class="text-xs text-red-500">Irreversível</p></div></button></div><input type="file" id="import-file-input" accept=".json" class="hidden"></div></div></div>
     <div id="delete-confirm-modal" class="fixed inset-0 z-[70] hidden"><div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div><div class="absolute inset-0 flex items-center justify-center p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm relative z-10 text-center"><div class="px-6 pt-6 pb-4"><div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"><svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg></div><h3 class="text-lg font-bold text-slate-800 mb-2" id="delete-confirm-title">Excluir?</h3><p class="text-sm text-slate-500" id="delete-confirm-message">Ação irreversível.</p></div><div class="flex gap-2 px-6 pb-6"><button id="btn-delete-cancel" class="flex-1 px-4 py-2.5 bg-slate-100 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-200 transition">Cancelar</button><button id="btn-delete-confirm" class="flex-1 px-4 py-2.5 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition">Excluir</button></div></div></div></div>
 
     <!-- ═══════════ File Preview Modal ═══════════ -->
@@ -2720,7 +2720,105 @@
         constructor() { this.CK='agendadiaria_lgpd_consent'; }
         hasConsented() { return localStorage.getItem(this.CK)==='true'; }
         consent() { localStorage.setItem(this.CK,'true'); }
-        async downloadExport(storage) { const notes=await storage.getAll(); const json=JSON.stringify({exportDate:new Date().toISOString(),appName:'AgendaDiaria',version:'1.0.0',notesCount:notes.length,notes:notes},null,2); const blob=new Blob([json],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a');a.href=url;a.download='agendadiaria_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url); }
+        async buildExportJson(storage) { const notes=await storage.getAll(); return JSON.stringify({exportDate:new Date().toISOString(),appName:'AgendaDiaria',version:'1.0.0',notesCount:notes.length,notes:notes},null,2); }
+        async downloadExport(storage) { const json=await this.buildExportJson(storage); const blob=new Blob([json],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a');a.href=url;a.download='agendadiaria_backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url); }
+      }
+      class GoogleDriveService {
+        constructor(clientId) {
+          this.clientId = clientId;
+          this.SCOPE = 'https://www.googleapis.com/auth/drive.file';
+          this.CK = 'agendadiaria_drive_connected';
+          this.FOLDER_CK = 'agendadiaria_drive_folder_id';
+          this.LAST_BACKUP_CK = 'agendadiaria_drive_last_backup';
+          this.tokenClient = null;
+          this.accessToken = null;
+          this.tokenExpiry = 0;
+          this._gisPromise = null;
+        }
+        _loadGis() {
+          if (this._gisPromise) return this._gisPromise;
+          this._gisPromise = new Promise((resolve, reject) => {
+            if (window.google && window.google.accounts && window.google.accounts.oauth2) { resolve(); return; }
+            const s = document.createElement('script');
+            s.src = 'https://accounts.google.com/gsi/client';
+            s.async = true;
+            s.onload = () => resolve();
+            s.onerror = () => reject(new Error('load-failed'));
+            document.head.appendChild(s);
+          });
+          return this._gisPromise;
+        }
+        async _client() {
+          await this._loadGis();
+          if (!this.tokenClient) {
+            this.tokenClient = google.accounts.oauth2.initTokenClient({ client_id: this.clientId, scope: this.SCOPE, callback: () => {} });
+          }
+          return this.tokenClient;
+        }
+        isConnected() { return localStorage.getItem(this.CK) === 'true'; }
+        lastBackupAt() { const v = localStorage.getItem(this.LAST_BACKUP_CK); return v ? new Date(parseInt(v)) : null; }
+        async ensureToken() {
+          if (this.accessToken && Date.now() < this.tokenExpiry) return this.accessToken;
+          const client = await this._client();
+          return new Promise((resolve, reject) => {
+            client.callback = (resp) => {
+              if (resp.error) { reject(new Error(resp.error)); return; }
+              this.accessToken = resp.access_token;
+              this.tokenExpiry = Date.now() + (resp.expires_in * 1000) - 60000;
+              localStorage.setItem(this.CK, 'true');
+              resolve(resp.access_token);
+            };
+            client.requestAccessToken({});
+          });
+        }
+        disconnect() {
+          if (this.accessToken && window.google && window.google.accounts && window.google.accounts.oauth2) {
+            google.accounts.oauth2.revoke(this.accessToken, () => {});
+          }
+          this.accessToken = null; this.tokenExpiry = 0;
+          localStorage.removeItem(this.CK);
+          localStorage.removeItem(this.FOLDER_CK);
+        }
+        async _folderId() {
+          let id = localStorage.getItem(this.FOLDER_CK);
+          if (id) return id;
+          const q = encodeURIComponent("name='AgendaDiária Backups' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+          const r = await fetch('https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id,name)', { headers: { Authorization: 'Bearer ' + this.accessToken } });
+          if (!r.ok) throw new Error('busca-pasta-falhou:' + r.status);
+          const d = await r.json();
+          if (d.files && d.files.length) { id = d.files[0].id; }
+          else {
+            const cr = await fetch('https://www.googleapis.com/drive/v3/files', {
+              method: 'POST',
+              headers: { Authorization: 'Bearer ' + this.accessToken, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: 'AgendaDiária Backups', mimeType: 'application/vnd.google-apps.folder' })
+            });
+            if (!cr.ok) throw new Error('criar-pasta-falhou:' + cr.status);
+            const cd = await cr.json();
+            id = cd.id;
+          }
+          localStorage.setItem(this.FOLDER_CK, id);
+          return id;
+        }
+        async backup(jsonString) {
+          await this.ensureToken();
+          const folderId = await this._folderId();
+          const filename = 'agendadiaria-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+          const metadata = { name: filename, parents: [folderId], mimeType: 'application/json' };
+          const boundary = 'agendadiaria' + Date.now();
+          const body = '--' + boundary + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) + '\r\n' +
+            '--' + boundary + '\r\nContent-Type: application/json\r\n\r\n' + jsonString + '\r\n' +
+            '--' + boundary + '--';
+          const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + this.accessToken, 'Content-Type': 'multipart/related; boundary=' + boundary },
+            body: body
+          });
+          if (!res.ok) { const t = await res.text(); throw new Error('upload-falhou:' + res.status + ':' + t); }
+          const data = await res.json();
+          localStorage.setItem(this.LAST_BACKUP_CK, Date.now().toString());
+          return data;
+        }
       }
       class UIService {
         constructor() { this.currentMonth=new Date().getMonth();this.currentYear=new Date().getFullYear();this.selectedDate=null;this.currentNote=null;this.notesDatesCache=new Set(); }
@@ -2729,7 +2827,7 @@
         dateToStr(y,m,d) { return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
       }
       class AgendaApp {
-        constructor() { this.storage=new StorageService();this.noteService=null;this.searchService=null;this.audioService=new AudioService();this.videoService=new VideoService();this.photoService=new PhotoService();this.fileService=new FileService();this.privacyService=new PrivacyService();this.ui=new UIService();this.isDirty=false;this.deleteCallback=null; }
+        constructor() { this.storage=new StorageService();this.noteService=null;this.searchService=null;this.audioService=new AudioService();this.videoService=new VideoService();this.photoService=new PhotoService();this.fileService=new FileService();this.privacyService=new PrivacyService();this.driveService=new GoogleDriveService('876972195137-tp1crthj0m98uq1s8heic24oqk3mlrst.apps.googleusercontent.com');this.ui=new UIService();this.isDirty=false;this.deleteCallback=null; }
         async init() { await this.storage.init();this.noteService=new NoteService(this.storage);this.searchService=new SearchService(this.storage);this._bindEvents();this._initSelects();this._checkLGPD();await this._renderCalendar(); }
         _checkLGPD() { if(!this.privacyService.hasConsented())document.getElementById('lgpd-banner').classList.remove('hidden'); }
         _initSelects() { const mo=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];const sM=document.getElementById('select-month');const sY=document.getElementById('select-year');mo.forEach((m,i)=>{const o=document.createElement('option');o.value=i;o.textContent=m;sM.appendChild(o);});sM.value=this.ui.currentMonth;const yn=new Date().getFullYear();for(let y=yn-20;y<=yn+20;y++){const o=document.createElement('option');o.value=y;o.textContent=y;sY.appendChild(o);}sY.value=this.ui.currentYear; }
@@ -2788,6 +2886,20 @@
             box.classList.remove('hidden');
           } catch (e) { box.classList.add('hidden'); }
         }
+        _updateDriveUI() {
+          const connected = this.driveService.isConnected();
+          document.getElementById('cloud-backup-disconnected').classList.toggle('hidden', connected);
+          document.getElementById('cloud-backup-connected').classList.toggle('hidden', !connected);
+          const status = document.getElementById('cloud-backup-status');
+          if (connected) {
+            const last = this.driveService.lastBackupAt();
+            status.textContent = last
+              ? 'Conectado. Último backup: ' + last.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) + '.'
+              : 'Conectado ao Google Drive. Você ainda não fez nenhum backup.';
+          } else {
+            status.textContent = 'Guarde uma cópia das suas memórias na sua própria conta Google — os dados vão direto para lá, nunca passam pelos nossos servidores.';
+          }
+        }
         _bindEvents() { const self=this;
             document.getElementById('btn-prev-month').addEventListener('click',async()=>{self.ui.currentMonth--;if(self.ui.currentMonth<0){self.ui.currentMonth=11;self.ui.currentYear--;}await self._renderCalendar();});
             document.getElementById('btn-next-month').addEventListener('click',async()=>{self.ui.currentMonth++;if(self.ui.currentMonth>11){self.ui.currentMonth=0;self.ui.currentYear++;}await self._renderCalendar();});
@@ -2795,7 +2907,7 @@
             document.getElementById('select-month').addEventListener('change',async e=>{self.ui.currentMonth=parseInt(e.target.value);await self._renderCalendar();});
             document.getElementById('select-year').addEventListener('change',async e=>{self.ui.currentYear=parseInt(e.target.value);await self._renderCalendar();});
             document.getElementById('btn-lgpd-accept').addEventListener('click',()=>{self.privacyService.consent();document.getElementById('lgpd-banner').classList.add('hidden');});
-            document.getElementById('btn-lgpd-export').addEventListener('click',()=>{document.getElementById('export-modal').classList.remove('hidden');self._updateStorageQuota();});
+            document.getElementById('btn-lgpd-export').addEventListener('click',()=>{document.getElementById('export-modal').classList.remove('hidden');self._updateStorageQuota();self._updateDriveUI();});
             document.getElementById('btn-privacy').addEventListener('click',()=>document.getElementById('privacy-modal').classList.remove('hidden'));
             document.getElementById('btn-close-privacy').addEventListener('click',()=>document.getElementById('privacy-modal').classList.add('hidden'));
             document.getElementById('privacy-modal-overlay').addEventListener('click',()=>document.getElementById('privacy-modal').classList.add('hidden'));
@@ -2826,7 +2938,10 @@
             document.getElementById('search-date-to').addEventListener('change',()=>self._performSearch());
             document.getElementById('btn-search-clear').addEventListener('click',()=>{document.getElementById('search-input').value='';document.getElementById('search-date-from').value='';document.getElementById('search-date-to').value='';document.getElementById('search-results').classList.add('hidden');document.getElementById('recent-notes-section').classList.remove('hidden');});
             document.getElementById('btn-close-results').addEventListener('click',()=>{document.getElementById('search-results').classList.add('hidden');document.getElementById('recent-notes-section').classList.remove('hidden');});
-            document.getElementById('btn-export').addEventListener('click',()=>{document.getElementById('export-modal').classList.remove('hidden');self._updateStorageQuota();});
+            document.getElementById('btn-export').addEventListener('click',()=>{document.getElementById('export-modal').classList.remove('hidden');self._updateStorageQuota();self._updateDriveUI();});
+            document.getElementById('btn-drive-connect').addEventListener('click',async()=>{try{self.ui.showToast('Abrindo login do Google...','info');await self.driveService.ensureToken();self._updateDriveUI();self.ui.showToast('Google Drive conectado!');}catch(e){self.ui.showToast('Não foi possível conectar ao Google Drive.','error');}});
+            document.getElementById('btn-drive-backup-now').addEventListener('click',async()=>{try{self.ui.showToast('Enviando backup para o Google Drive...','info');const json=await self.privacyService.buildExportJson(self.storage);await self.driveService.backup(json);self._updateDriveUI();self.ui.showToast('Backup salvo no Google Drive!');}catch(e){self.ui.showToast('Falha ao enviar backup para o Drive.','error');}});
+            document.getElementById('btn-drive-disconnect').addEventListener('click',()=>{self.driveService.disconnect();self._updateDriveUI();self.ui.showToast('Google Drive desconectado.','info');});
             document.getElementById('btn-close-export').addEventListener('click',()=>document.getElementById('export-modal').classList.add('hidden'));
             document.getElementById('export-modal-overlay').addEventListener('click',()=>document.getElementById('export-modal').classList.add('hidden'));
             document.getElementById('btn-export-json').addEventListener('click',async()=>{await self.privacyService.downloadExport(self.storage);self.ui.showToast('Dados exportados!');});
