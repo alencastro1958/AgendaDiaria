@@ -1,0 +1,17 @@
+{
+  "migrationsTable": "pgmigrations",
+  "dir": "migrations",
+  "direction": "up",
+  "count": 999,
+  "createSchema": true,
+  "createMigrationsSchema": false,
+  "checkOrder": true,
+  "verbose": true,
+  "decamelize": true,
+  "ignorePattern": "\\..*\\.js",
+  "host": "localhost",
+  "port": 5433,
+  "database": "agenda_dinamica",
+  "user": "agenda_user",
+  "password": "agenda_password_dev"
+}

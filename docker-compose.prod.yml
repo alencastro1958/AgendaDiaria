@@ -1,0 +1,111 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: agendadiaria-db-prod
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME:-agendadiaria}
+      POSTGRES_USER: ${DB_USER:-agendadiaria_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      POSTGRES_HOST_AUTH_METHOD: md5
+    ports:
+      - "127.0.0.1:5432:5432"  # Only localhost access
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-agendadiaria_user} -d ${DB_NAME:-agendadiaria}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # Backend API (Node.js)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: agendadiaria-api-prod
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://${DB_USER:-agendadiaria_user}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-agendadiaria}
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-agendadiaria}
+      - DB_USER=${DB_USER:-agendadiaria_user}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-7d}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=${EMAIL_FROM:-noreply@agendadiaria.com}
+      - CORS_ORIGIN=${CORS_ORIGIN:-https://yourdomain.com}
+      - BCRYPT_ROUNDS=${BCRYPT_ROUNDS:-12}
+      - RATE_LIMIT_WINDOW=${RATE_LIMIT_WINDOW:-15}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
+      - UPLOAD_DIR=/app/uploads
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-10485760}
+      - MAX_AUDIO_SIZE=${MAX_AUDIO_SIZE:-5242880}
+      - MAX_VIDEO_SIZE=${MAX_VIDEO_SIZE:-52428800}
+      - STORAGE_QUOTA=${STORAGE_QUOTA:-104857600}
+      - TRIAL_PERIOD_DAYS=${TRIAL_PERIOD_DAYS:-3}
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx (Reverse Proxy + Frontend)
+  nginx:
+    image: nginx:alpine
+    container_name: agendadiaria-nginx-prod
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - uploads_data:/uploads:ro
+    depends_on:
+      - backend
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  backend:
+    driver: bridge
