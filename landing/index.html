@@ -33,6 +33,15 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-snap-type: y proximity;
+  }
+
+  /* Cada bloco da landing ocupa uma "tela" e a rolagem se ajusta ao topo dele,
+     sempre respeitando a nav fixa. "proximity" (nao "mandatory") para nao
+     prender o usuario em blocos mais altos que a janela. */
+  .hero, .section, .timeline-section, .vision, .cta-section {
+    scroll-snap-align: start;
+    scroll-margin-top: 5.5rem;
   }
 
   body {
@@ -264,16 +273,20 @@
   }
 
   .hero-scroll {
-    position: absolute;
-    bottom: 2.5rem;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+    margin-top: 3.5rem;
     opacity: 0;
     animation: fadeUp 0.8s ease 1.2s forwards;
+  }
+
+  /* Em janelas baixas (poucos px de altura util), o convite decorativo de
+     rolagem cede lugar ao que importa: titulo e botoes nunca disputam
+     espaco com ele. */
+  @media (max-height: 700px) {
+    .hero-scroll { display: none; }
   }
 
   .hero-scroll span {
