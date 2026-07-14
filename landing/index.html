@@ -2338,7 +2338,7 @@
       const login = document.getElementById('regLogin').value.trim();
       const password = document.getElementById('regPassword').value;
 
-      if (!name) { shakeField('regName'); return; }
+      if (!name) { shakeField('regName'); showToast('Informe seu nome.'); return; }
 
       // Validate CPF
       if (!cpf || cpf.replace(/\D/g, '').length !== 11) {
@@ -2354,9 +2354,9 @@
         return;
       }
 
-      if (!email || !email.includes('@') || !email.includes('.')) { shakeField('regEmail'); return; }
-      if (!login || login.length < 3) { shakeField('regLogin'); return; }
-      if (password.length < 6) { shakeField('regPassword'); return; }
+      if (!email || !email.includes('@') || !email.includes('.')) { shakeField('regEmail'); showToast('Informe um e-mail válido.'); return; }
+      if (!login || login.length < 3) { shakeField('regLogin'); showToast('O login precisa ter pelo menos 3 caracteres.'); return; }
+      if (password.length < 6) { shakeField('regPassword'); showToast('A senha precisa ter pelo menos 6 caracteres.'); return; }
 
       // Check if login or email already exists
       const existing = findUser(login) || findUser(email);
@@ -2364,10 +2364,12 @@
         if (existing.login === login) {
           shakeField('regLogin');
           document.getElementById('regLogin').style.borderColor = '#ef4444';
+          showToast('Este login já está em uso. Escolha outro ou faça login.');
           return;
         }
         shakeField('regEmail');
         document.getElementById('regEmail').style.borderColor = '#ef4444';
+        showToast('Este e-mail já está cadastrado. Faça login ou use outro e-mail.');
         return;
       }
 
@@ -2408,11 +2410,13 @@
       const user = findUser(identifier);
       if (!user) {
         shakeField('loginEmail');
+        showToast('Não encontramos essa conta neste navegador. Verifique o e-mail/login ou cadastre-se.');
         return;
       }
 
       if (user.password !== btoa(password)) {
         shakeField('loginPassword');
+        showToast('Senha incorreta. Tente novamente.');
         return;
       }
 
