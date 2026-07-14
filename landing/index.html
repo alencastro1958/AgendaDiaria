@@ -2608,6 +2608,38 @@
         async getDatesWithNotes(year, month) { const allNotes = await this.getAll(); const s = new Set(); allNotes.forEach(n => { const d = new Date(n.date + 'T12:00:00'); if (d.getFullYear() === year && d.getMonth() === month) s.add(n.date); }); return s; }
         async importData(notes) { return new Promise((resolve, reject) => { const tx = this.db.transaction('notes', 'readwrite'); const store = tx.objectStore('notes'); notes.forEach(n => store.put(n)); tx.oncomplete = () => resolve(); tx.onerror = (e) => reject(e.target.error); }); }
       }
+      class SqliteStorageService {
+        constructor() { this.worker = null; this._reqId = 0; this._pending = new Map(); this.engine = 'sqlite'; }
+        _call(cmd, payload) {
+          const id = ++this._reqId;
+          return new Promise((resolve, reject) => {
+            this._pending.set(id, { resolve, reject });
+            this.worker.postMessage({ id, cmd, payload });
+          });
+        }
+        async init() {
+          this.worker = new Worker('db-worker.js', { type: 'module' });
+          this.worker.onmessage = (ev) => {
+            const { id, ok, result, error } = ev.data;
+            const p = this._pending.get(id);
+            if (!p) return;
+            this._pending.delete(id);
+            ok ? p.resolve(result) : p.reject(new Error(error));
+          };
+          this.worker.onerror = (e) => { for (const p of this._pending.values()) p.reject(e); this._pending.clear(); };
+          await this._call('init');
+        }
+        async save(note) { await this._call('saveNote', { note }); return note; }
+        async getById(id) { return await this._call('getById', { id }); }
+        async getByDate(dateStr) { return await this._call('getByDate', { date: dateStr }); }
+        async getAll() { return await this._call('getAll'); }
+        async delete(id) { await this._call('deleteNote', { id }); }
+        async deleteAll() { await this._call('clearAll'); }
+        async getDatesWithNotes(year, month) { const dates = await this._call('getDatesWithNotes', { year, month }); return new Set(dates); }
+        async importData(notes) { await this._call('migrateFromArray', { notes }); }
+        async searchFts(query, dateFrom, dateTo) { return await this._call('search', { query, dateFrom, dateTo }); }
+        async countNotes() { return await this._call('countNotes'); }
+      }
       class NoteService {
         constructor(storage) { this.storage = storage; }
         createEmptyNote(dateStr) { return { id: UUIDGenerator.generate(), date: dateStr, title: '', content: '', tags: [], links: [], files: [], audioRecordings: [], videoRecordings: [], photos: [], createdAt: Date.now(), updatedAt: Date.now() }; }
@@ -2631,7 +2663,17 @@
       }
       class SearchService {
         constructor(storage) { this.storage = storage; }
-        async search(query, dateFrom, dateTo) { let r = await this.storage.getAll(); if (dateFrom) r = r.filter(n => n.date >= dateFrom); if (dateTo) r = r.filter(n => n.date <= dateTo); if (query && query.trim()) { const terms = query.toLowerCase().split(/\s+/).filter(Boolean); r = r.filter(note => { const s = [note.title||'', note.content||'', (note.tags||[]).join(' '), (note.links||[]).map(l => (l.title||'')+' '+(l.url||'')+' '+(l.description||'')).join(' '), this._dptbr(note.date)].join(' ').toLowerCase(); return terms.every(t => s.includes(t)); }); } r.sort((a, b) => b.date.localeCompare(a.date)); return r; }
+        async search(query, dateFrom, dateTo) {
+          if (this.storage.searchFts && query && query.trim()) {
+            try {
+              const ftsQuery = query.trim().split(/\s+/).filter(Boolean).map(t => '"' + t.replace(/"/g, '""') + '"*').join(' ');
+              const r = await this.storage.searchFts(ftsQuery, dateFrom, dateTo);
+              r.sort((a, b) => b.date.localeCompare(a.date));
+              return r;
+            } catch (e) { console.error('Busca FTS5 falhou, usando busca simples', e); }
+          }
+          let r = await this.storage.getAll(); if (dateFrom) r = r.filter(n => n.date >= dateFrom); if (dateTo) r = r.filter(n => n.date <= dateTo); if (query && query.trim()) { const terms = query.toLowerCase().split(/\s+/).filter(Boolean); r = r.filter(note => { const s = [note.title||'', note.content||'', (note.tags||[]).join(' '), (note.links||[]).map(l => (l.title||'')+' '+(l.url||'')+' '+(l.description||'')).join(' '), this._dptbr(note.date)].join(' ').toLowerCase(); return terms.every(t => s.includes(t)); }); } r.sort((a, b) => b.date.localeCompare(a.date)); return r;
+        }
         _dptbr(d) { if (!d) return ''; const [y,m,dd] = d.split('-'); const mo = ['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']; return dd+' de '+mo[parseInt(m)-1]+' de '+y+' '+d; }
       }
       class AudioService {
@@ -2827,8 +2869,40 @@
         dateToStr(y,m,d) { return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
       }
       class AgendaApp {
-        constructor() { this.storage=new StorageService();this.noteService=null;this.searchService=null;this.audioService=new AudioService();this.videoService=new VideoService();this.photoService=new PhotoService();this.fileService=new FileService();this.privacyService=new PrivacyService();this.driveService=new GoogleDriveService('876972195137-tp1crthj0m98uq1s8heic24oqk3mlrst.apps.googleusercontent.com');this.ui=new UIService();this.isDirty=false;this.deleteCallback=null; }
-        async init() { await this.storage.init();this.noteService=new NoteService(this.storage);this.searchService=new SearchService(this.storage);this._bindEvents();this._initSelects();this._checkLGPD();await this._renderCalendar(); }
+        constructor() { this.storage=null;this.noteService=null;this.searchService=null;this.audioService=new AudioService();this.videoService=new VideoService();this.photoService=new PhotoService();this.fileService=new FileService();this.privacyService=new PrivacyService();this.driveService=new GoogleDriveService('876972195137-tp1crthj0m98uq1s8heic24oqk3mlrst.apps.googleusercontent.com');this.ui=new UIService();this.isDirty=false;this.deleteCallback=null; }
+        async init() {
+          const candidate = new SqliteStorageService();
+          try {
+            await candidate.init();
+            this.storage = candidate;
+            await this._migrateFromIndexedDbIfNeeded();
+          } catch (e) {
+            const msg = String((e && e.message) || e);
+            if (/createSyncAccessHandle|Access Handles/i.test(msg)) { this._showTabConflictScreen(); return; }
+            console.error('SQLite indisponivel, usando IndexedDB', e);
+            this.storage = new StorageService();
+            await this.storage.init();
+          }
+          this.noteService=new NoteService(this.storage);this.searchService=new SearchService(this.storage);this._bindEvents();this._initSelects();this._checkLGPD();await this._renderCalendar();
+        }
+        async _migrateFromIndexedDbIfNeeded() {
+          const FLAG = 'agendadiaria_sqlite_migrated';
+          if (localStorage.getItem(FLAG) === 'true') return;
+          try {
+            const oldStorage = new StorageService();
+            await oldStorage.init();
+            const oldNotes = await oldStorage.getAll();
+            if (oldNotes.length > 0) {
+              await this.storage.importData(oldNotes);
+              const newCount = await this.storage.countNotes();
+              if (newCount < oldNotes.length) throw new Error('contagem pos-migracao inconsistente: ' + newCount + ' < ' + oldNotes.length);
+            }
+            localStorage.setItem(FLAG, 'true');
+          } catch (e) { console.error('Falha ao migrar dados do IndexedDB para SQLite, tentaremos novamente na proxima carga', e); }
+        }
+        _showTabConflictScreen() {
+          document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem;font-family:var(--font-body,sans-serif);background:var(--cream,#faf8f5);"><div style="max-width:420px;"><h2 style="font-family:var(--font-display,serif);color:var(--ink,#1a1625);font-size:1.4rem;margin-bottom:1rem;">AgendaDiária já está aberta em outra aba</h2><p style="color:var(--ink-muted,#6b6183);line-height:1.6;margin-bottom:1.5rem;">Para proteger suas memórias de conflitos, só é possível usar uma aba por vez. Feche a outra aba do AgendaDiária e recarregue esta página.</p><button onclick="location.reload()" style="background:var(--indigo,#2c1e4a);color:white;border:none;padding:.75rem 1.5rem;border-radius:100px;font-weight:600;cursor:pointer;font-size:.95rem;">Recarregar</button></div></div>';
+        }
         _checkLGPD() { if(!this.privacyService.hasConsented())document.getElementById('lgpd-banner').classList.remove('hidden'); }
         _initSelects() { const mo=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];const sM=document.getElementById('select-month');const sY=document.getElementById('select-year');mo.forEach((m,i)=>{const o=document.createElement('option');o.value=i;o.textContent=m;sM.appendChild(o);});sM.value=this.ui.currentMonth;const yn=new Date().getFullYear();for(let y=yn-20;y<=yn+20;y++){const o=document.createElement('option');o.value=y;o.textContent=y;sY.appendChild(o);}sY.value=this.ui.currentYear; }
         async _renderCalendar() { const year=this.ui.currentYear;const month=this.ui.currentMonth;const mo=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];document.getElementById('calendar-month-year').textContent=mo[month]+' '+year;document.getElementById('select-month').value=month;document.getElementById('select-year').value=year;this.ui.notesDatesCache=await this.storage.getDatesWithNotes(year,month);const grid=document.getElementById('calendar-grid');grid.innerHTML='';const fd=new Date(year,month,1).getDay();const dim=new Date(year,month+1,0).getDate();const today=new Date();const ts=this.ui.dateToStr(today.getFullYear(),today.getMonth(),today.getDate());for(let i=0;i<fd;i++){const c=document.createElement('div');c.className='h-24 sm:h-28 border-b border-r border-slate-100 bg-slate-50/50';grid.appendChild(c);}for(let d=1;d<=dim;d++){const ds=this.ui.dateToStr(year,month,d);const c=document.createElement('div');c.className='calendar-day h-24 sm:h-28 border-b border-r border-slate-100 p-2 sm:p-3 relative hover:bg-blue-50 cursor-pointer rounded-lg m-0.5';c.dataset.date=ds;if(ds===ts)c.classList.add('today');if(this.ui.notesDatesCache.has(ds))c.classList.add('has-note');if(ds===this.ui.selectedDate)c.classList.add('selected');c.innerHTML='<span class="text-sm font-medium '+(ds===ts?'text-white':'text-slate-700')+'">'+d+'</span>';((d,a)=>{c.addEventListener('click',()=>a._openEditor(d));})(ds,this);grid.appendChild(c);}const rem=(7-((fd+dim)%7))%7;for(let j=0;j<rem;j++){const c=document.createElement('div');c.className='h-24 sm:h-28 border-b border-r border-slate-100 bg-slate-50/50';grid.appendChild(c);}await this._renderRecentNotes(); }
