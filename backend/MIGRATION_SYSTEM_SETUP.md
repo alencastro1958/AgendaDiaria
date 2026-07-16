@@ -249,4 +249,4 @@ Now that the migration system is set up, you can:
 
 - [node-pg-migrate Documentation](https://salsita.github.io/node-pg-migrate/)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [Design Document - Database Schema](../.kiro/specs/multi-user-authentication/design.md#database-schema-postgresql)
+- [Design Document - Database Schema](../docs/specs/multi-user-authentication/design.md#database-schema-postgresql)

@@ -277,7 +277,7 @@ docker-compose logs postgres
 
 ---
 
-**Task Completed By:** Kiro AI Assistant  
+**Task Completed By:** Equipe AgendaDiária  
 **Verification Status:** ✅ All 28 tests passed  
 **Documentation Status:** ✅ Complete  
 **Ready for Next Phase:** ✅ Yes

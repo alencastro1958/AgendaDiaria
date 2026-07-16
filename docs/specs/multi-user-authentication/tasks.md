@@ -354,7 +354,7 @@ This document outlines the implementation tasks for transforming AgendaDiaria in
 
 ### 6.4 Subscription Endpoints
 - [~] Create subscriptions repository
-- [~] Define subscription plans (monthly: R$29.90, annual: R$299.00)
+- [~] Define subscription plans (monthly: R$14.90, annual: R$150.00 à vista; 12x R$14.90 = R$178.80)
 - [~] Implement POST /api/subscription/subscribe endpoint
 - [~] Accept plan_id (monthly or annual)
 - [~] Verify user has payment method
