@@ -11,6 +11,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <meta name="theme-color" content="#2c1e4a">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="AgendaDiária">
@@ -2375,11 +2376,108 @@
       localStorage.setItem('agendadiaria_users', JSON.stringify(users));
     }
 
-    // btoa() lanca InvalidCharacterError com qualquer caractere acima de Latin-1
-    // (€, emoji, cirilico). Retorna null nesses casos em vez de estourar.
-    function encodePassword(password) {
-      try { return btoa(password); }
-      catch { return null; }
+    // ── Sessao ──
+    // Nem o login nem o cadastro gravavam sessao: so o fluxo de pagamento escrevia
+    // 'agendadiaria_user'. Recarregar a pagina jogava o usuario de volta na landing.
+    // Guarda um subconjunto seguro — o hash e o salt da senha nunca entram aqui.
+    function startSession(user) {
+      localStorage.setItem('agendadiaria_user', JSON.stringify({
+        name: user.name,
+        cpf: user.cpf,
+        email: user.email,
+        login: user.login,
+        trialEndsAt: user.trialEndsAt
+      }));
+    }
+
+    function endSession() {
+      localStorage.removeItem('agendadiaria_user');
+    }
+
+    function restoreSession() {
+      let session = null;
+      try { session = JSON.parse(localStorage.getItem('agendadiaria_user') || 'null'); }
+      catch { endSession(); return; }
+      // So restaura se a conta ainda existir nesta origem: limpar as contas pelo
+      // console ou trocar de dispositivo deixaria uma sessao orfa apontando para
+      // um usuario inexistente.
+      if (session && session.login && findUser(session.login)) showApp();
+      else if (session) endSession();
+    }
+
+    // ── Senhas: PBKDF2-SHA256 com salt por usuario ──
+    // Antes daqui a senha era guardada como btoa(senha) — Base64, reversivel com
+    // um atob(). Num app local isso nao expoe o diario (quem tem o aparelho tem
+    // os dados de qualquer forma), mas expoe a SENHA, que as pessoas reusam: o
+    // que vazasse aqui abriria o e-mail delas em outro lugar.
+    const PWD_ALGO = 'PBKDF2-SHA256-210000';
+    const PWD_ITERATIONS = 210000;
+
+    function bytesToB64(bytes) {
+      let s = '';
+      for (const b of bytes) s += String.fromCharCode(b);
+      return btoa(s);
+    }
+
+    function b64ToBytes(b64) {
+      const s = atob(b64);
+      const a = new Uint8Array(s.length);
+      for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i);
+      return a;
+    }
+
+    function newSalt() {
+      const a = new Uint8Array(16);
+      crypto.getRandomValues(a);
+      return bytesToB64(a);
+    }
+
+    function cryptoReady() {
+      return typeof crypto !== 'undefined' && crypto.subtle && typeof crypto.subtle.deriveBits === 'function';
+    }
+
+    // TextEncoder codifica Unicode inteiro, entao o limite do btoa a Latin-1
+    // deixa de existir: emoji e qualquer acento passam a funcionar na senha.
+    async function hashPassword(password, saltB64) {
+      const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits(
+        { name: 'PBKDF2', salt: b64ToBytes(saltB64), iterations: PWD_ITERATIONS, hash: 'SHA-256' },
+        key, 256
+      );
+      return bytesToB64(new Uint8Array(bits));
+    }
+
+    async function verifyPassword(user, password) {
+      if (user.passwordHash && user.passwordSalt) {
+        return await hashPassword(password, user.passwordSalt) === user.passwordHash;
+      }
+      // Conta ainda no formato antigo: a migracao roda em segundo plano na carga
+      // da pagina, entao um login disparado antes dela terminar cai aqui.
+      if (user.password) {
+        try { return user.password === btoa(password); } catch { return false; }
+      }
+      return false;
+    }
+
+    // Converte as contas gravadas no formato antigo. Como atob() devolve a senha
+    // em claro, da para migrar sem pedir que o usuario faca login — o texto claro
+    // some do localStorage ja na proxima carga da pagina.
+    async function migrateLegacyPasswords() {
+      if (!cryptoReady()) return;
+      const users = getUsers();
+      let changed = false;
+      for (const u of users) {
+        if (u.password && !u.passwordHash) {
+          let plain;
+          try { plain = atob(u.password); } catch { continue; }
+          u.passwordSalt = newSalt();
+          u.passwordHash = await hashPassword(plain, u.passwordSalt);
+          u.passwordAlgo = PWD_ALGO;
+          delete u.password;
+          changed = true;
+        }
+      }
+      if (changed) saveUsers(users);
     }
 
     function findUser(identifier) {
@@ -2391,7 +2489,7 @@
     }
 
     // ── Registration Handler ──
-    function handleRegister() {
+    async function handleRegister() {
       const name = document.getElementById('regName').value.trim();
       const cpf = document.getElementById('regCPF').value.trim();
       const email = document.getElementById('regEmail').value.trim();
@@ -2433,24 +2531,23 @@
         return;
       }
 
-      const encoded = encodePassword(password);
-      if (encoded === null) {
-        shakeField('regPassword');
-        showToast('Sua senha tem caracteres não suportados. Use letras, números e acentos comuns.');
-        return;
-      }
+      if (!cryptoReady()) { showToast('Seu navegador não suporta o recurso de segurança necessário. Use uma versão atualizada.'); return; }
 
       // Save user
+      const salt = newSalt();
       const user = {
         name,
         cpf: cpf.replace(/\D/g, ''),
         email,
         login,
-        password: encoded,
+        passwordHash: await hashPassword(password, salt),
+        passwordSalt: salt,
+        passwordAlgo: PWD_ALGO,
         createdAt: Date.now(),
         trialEndsAt: Date.now() + (72 * 60 * 60 * 1000)
       };
       saveUser(user);
+      startSession(user);
 
       closeModal('regModal');
       showToast('Conta criada! Bem-vindo(a), ' + name.split(' ')[0] + '!');
@@ -2467,7 +2564,7 @@
     }
 
     // ── Login Handler ──
-    function handleLogin() {
+    async function handleLogin() {
       const identifier = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
 
@@ -2481,12 +2578,13 @@
         return;
       }
 
-      if (user.password !== encodePassword(password)) {
+      if (!await verifyPassword(user, password)) {
         shakeField('loginPassword');
         showToast('Senha incorreta. Tente novamente. Se esqueceu, use "Esqueceu sua senha?".');
         return;
       }
 
+      startSession(user);
       closeModal('loginModal');
       showToast('Bem-vindo(a) de volta, ' + user.name.split(' ')[0] + '!');
       document.getElementById('loginEmail').value = '';
@@ -2499,7 +2597,7 @@
     // ── Password Reset (local) ──
     // Sem servidor nao ha e-mail de recuperacao: a conferencia possivel e o CPF
     // do cadastro. A senha nao cifra as anotacoes, entao redefinir nao perde dados.
-    function handleResetPassword() {
+    async function handleResetPassword() {
       const identifier = document.getElementById('resetIdentifier').value.trim();
       const cpf = document.getElementById('resetCPF').value.trim();
       const password = document.getElementById('resetPassword').value;
@@ -2530,14 +2628,13 @@
       if (password.length < 6) { shakeField('resetPassword'); showToast('A senha precisa ter pelo menos 6 caracteres.'); return; }
       if (password !== password2) { shakeField('resetPassword2'); showToast('As senhas não coincidem.'); return; }
 
-      const encoded = encodePassword(password);
-      if (encoded === null) {
-        shakeField('resetPassword');
-        showToast('Sua senha tem caracteres não suportados. Use letras, números e acentos comuns.');
-        return;
-      }
+      if (!cryptoReady()) { showToast('Seu navegador não suporta o recurso de segurança necessário. Use uma versão atualizada.'); return; }
 
-      users[index].password = encoded;
+      const salt = newSalt();
+      users[index].passwordHash = await hashPassword(password, salt);
+      users[index].passwordSalt = salt;
+      users[index].passwordAlgo = PWD_ALGO;
+      delete users[index].password;
       saveUsers(users);
 
       closeModal('resetModal');
@@ -2707,6 +2804,7 @@
     }
 
     function doLogout() {
+      endSession();
       document.getElementById('appContainer').style.display = 'none';
       document.querySelector('.hero').style.display = '';
       document.querySelectorAll('.section, .section-dark, .section-warm, .timeline-section, .vision, .cta-section').forEach(el => el.style.display = '');
@@ -3153,6 +3251,13 @@
       window._agendaApp = new AgendaApp();
       window._agendaApp.init();
     }
+
+    // ── Inicializacao ──
+    // Este script fica no fim do body, entao o DOM ja existe aqui.
+    // A migracao das senhas antigas roda em segundo plano; verifyPassword()
+    // aceita os dois formatos, entao um login durante a migracao funciona.
+    migrateLegacyPasswords().catch(e => console.error('Falha ao migrar senhas', e));
+    restoreSession();
   </script>
 
 </body>

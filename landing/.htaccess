@@ -1,0 +1,45 @@
+# ── Origem canonica: https:// sem www ──
+#
+# Isto nao e preferencia de SEO, e requisito de funcionamento.
+#
+# O AgendaDiaria guarda as contas em localStorage, que o navegador isola por
+# ORIGEM (esquema + host + porta). Sem estes redirects, os quatro enderecos
+# abaixo respondiam 200 e viravam quatro cofres de contas separados:
+#
+#   http://exemplo.com   http://www.exemplo.com
+#   https://exemplo.com  https://www.exemplo.com
+#
+# Na pratica: a pessoa cadastrava em um endereco e "a senha nao era
+# reconhecida" no outro, sem ter como descobrir o motivo.
+#
+# As regras sao genericas (usam %{HTTP_HOST}), entao o mesmo pacote serve
+# qualquer dominio sem edicao.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # http -> https
+  # A segunda condicao evita laco infinito caso a hospedagem passe a terminar
+  # o SSL num proxy: nesse caso %{HTTPS} chega como off mesmo em conexao segura.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # www -> sem www
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# O SQLite roda em WebAssembly: sem este tipo o navegador recusa a compilacao
+# em streaming e cai num caminho mais lento, quando nao falha.
+<IfModule mod_mime.c>
+  AddType application/wasm .wasm
+</IfModule>
+
+# index.html nunca deve ser servido de cache: e nele que vive o app inteiro,
+# entao uma copia velha significa usuario rodando versao antiga apos o deploy.
+<IfModule mod_headers.c>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
