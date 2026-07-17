@@ -1,14 +1,22 @@
 {
-  "_leia_me": "Editado pela dashboard em admin/index.html. Nao edite a mao a menos que saiba o que esta fazendo. O desconto do plano anual NAO entra aqui: e calculado pelo app a partir dos precos.",
+  "_leia_me": "Gerado pelo painel em admin/index.html. O desconto do plano anual NAO entra aqui: e calculado pelo app a partir dos precos. Este arquivo deve espelhar o que esta publicado — se divergir, um deploy futuro desfaz a alteracao do painel em silencio.",
   "version": 1,
   "plans": {
-    "monthly": { "price": 14.90 },
-    "annual": { "price": 150.00, "installments": 12 }
+    "monthly": {
+      "price": 16.9
+    },
+    "annual": {
+      "price": 150,
+      "installments": 12
+    }
   },
-  "trial": { "hours": 72, "unit": "hours" },
+  "trial": {
+    "hours": 72,
+    "unit": "hours"
+  },
   "sales": {
-    "mode": "live",
+    "mode": "soon",
     "soonBadge": "Em breve",
-    "soonNote": "As assinaturas ainda nao estao abertas. Deixe seu e-mail e avisamos assim que abrirem."
+    "soonNote": "As assinaturas ainda não estão abertas. Deixe seu e-mail e avisamos assim que abrirem."
   }
 }
