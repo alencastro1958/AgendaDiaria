@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgendaDiária — Painel do Gestor</title>
+<style>
+  :root {
+    --roxo: #2c1e4a; --ambar: #d97706; --ambar-claro: #fffbeb;
+    --borda: #e2e8f0; --texto: #1e293b; --suave: #64748b; --fundo: #f8fafc;
+    --verde: #16a34a; --verde-fundo: #f0fdf4; --vermelho: #dc2626; --vermelho-fundo: #fef2f2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem 1rem; background: var(--fundo); color: var(--texto);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; line-height: 1.5;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  header { margin-bottom: 1.75rem; }
+  h1 { margin: 0 0 0.35rem; font-size: 1.5rem; color: var(--roxo); }
+  header p { margin: 0; color: var(--suave); font-size: 0.9rem; }
+  .card {
+    background: white; border: 1px solid var(--borda); border-radius: 0.85rem;
+    padding: 1.5rem; margin-bottom: 1.25rem;
+  }
+  .card h2 {
+    margin: 0 0 1.1rem; font-size: 1rem; color: var(--roxo);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .num { background: var(--roxo); color: white; width: 1.5rem; height: 1.5rem; border-radius: 50%;
+         display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; }
+  label { display: block; font-size: 0.82rem; font-weight: 600; color: #475569; margin-bottom: 0.3rem; }
+  .hint { font-weight: 400; color: var(--suave); font-size: 0.75rem; }
+  input[type="number"], input[type="text"], textarea {
+    width: 100%; padding: 0.65rem; border: 1.5px solid var(--borda); border-radius: 0.5rem;
+    font-size: 0.95rem; font-family: inherit;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--ambar); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .campo { margin-bottom: 1rem; }
+  .calc { background: var(--verde-fundo); border: 1px solid #bbf7d0; border-radius: 0.65rem; padding: 1rem; }
+  .calc.alerta { background: var(--vermelho-fundo); border-color: #fecaca; }
+  .calc-linha { display: flex; justify-content: space-between; font-size: 0.88rem; padding: 0.2rem 0; }
+  .calc-linha strong { font-variant-numeric: tabular-nums; }
+  .calc-destaque { border-top: 1px dashed #86efac; margin-top: 0.5rem; padding-top: 0.5rem; font-size: 1rem; }
+  .calc.alerta .calc-destaque { border-top-color: #fecaca; }
+  .aviso { color: var(--vermelho); font-size: 0.8rem; margin: 0.6rem 0 0; }
+  .radios { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .radio {
+    flex: 1; min-width: 200px; border: 2px solid var(--borda); border-radius: 0.65rem;
+    padding: 0.85rem; cursor: pointer; transition: 0.15s;
+  }
+  .radio.on { border-color: var(--ambar); background: var(--ambar-claro); }
+  .radio-t { font-weight: 600; font-size: 0.9rem; }
+  .radio-d { font-size: 0.76rem; color: var(--suave); margin-top: 0.15rem; }
+  .previa { background: #faf9fb; border: 1px dashed #cbd5e1; border-radius: 0.65rem; padding: 1.1rem; }
+  .cartoes { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .cartao { background: white; border: 1px solid var(--borda); border-radius: 0.6rem; padding: 0.9rem; text-align: center; }
+  .cartao.pop { border-color: var(--ambar); border-width: 2px; }
+  .c-nome { font-size: 0.78rem; color: var(--suave); }
+  .c-preco { font-size: 1.35rem; font-weight: 700; color: var(--roxo); margin: 0.2rem 0; }
+  .c-preco span { font-size: 0.75rem; font-weight: 400; color: var(--suave); }
+  .c-per { font-size: 0.68rem; color: var(--suave); min-height: 1.6em; }
+  .c-save { font-size: 0.7rem; color: var(--verde); font-weight: 600; margin-top: 0.3rem; }
+  .c-btn { margin-top: 0.7rem; padding: 0.5rem; border-radius: 0.4rem; font-size: 0.78rem; font-weight: 600;
+           background: var(--roxo); color: white; }
+  .c-btn.off { background: #cbd5e1; color: #64748b; }
+  .acoes { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+  button.primario {
+    background: var(--ambar); color: white; border: none; padding: 0.8rem 1.5rem;
+    border-radius: 0.55rem; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+  }
+  button.primario:disabled { background: #cbd5e1; cursor: not-allowed; }
+  button.secundario {
+    background: white; color: var(--roxo); border: 1.5px solid var(--borda);
+    padding: 0.8rem 1.25rem; border-radius: 0.55rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  }
+  .passos { counter-reset: p; margin: 0; padding: 0; list-style: none; }
+  .passos li {
+    counter-increment: p; position: relative; padding-left: 2rem; margin-bottom: 0.6rem; font-size: 0.88rem;
+  }
+  .passos li::before {
+    content: counter(p); position: absolute; left: 0; top: 0.05rem;
+    background: var(--ambar-claro); color: var(--ambar); border: 1px solid #fde68a;
+    width: 1.4rem; height: 1.4rem; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 0.72rem; font-weight: 700;
+  }
+  code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; }
+  .json { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 0.5rem; font-size: 0.75rem;
+          overflow-x: auto; white-space: pre; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  @media (max-width: 620px) { .grid, .cartoes { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Painel do Gestor — AgendaDiária</h1>
+    <p>Altere preços e o modo de vendas sem mexer em código. O desconto é calculado sozinho.</p>
+  </header>
+
+  <div class="card">
+    <h2><span class="num">1</span> Preços</h2>
+    <div class="grid">
+      <div class="campo">
+        <label for="mensal">Plano mensal (R$)</label>
+        <input type="number" id="mensal" step="0.01" min="0.01" value="14.90">
+      </div>
+      <div class="campo">
+        <label for="anual">Plano anual à vista (R$)</label>
+        <input type="number" id="anual" step="0.01" min="0.01" value="150.00">
+      </div>
+      <div class="campo">
+        <label for="parcelas">Parcelas do anual no cartão <span class="hint">(normalmente 12)</span></label>
+        <input type="number" id="parcelas" step="1" min="1" max="24" value="12">
+      </div>
+      <div class="campo">
+        <label for="trial">Duração do trial <span class="hint">— o site escreve exatamente a unidade que você escolher</span></label>
+        <div style="display:flex;gap:0.5rem;">
+          <input type="number" id="trial" step="1" min="1" value="72" style="flex:1;">
+          <select id="trialUnit" aria-label="Unidade do trial" title="Unidade do trial" style="padding:0.65rem;border:1.5px solid var(--borda);border-radius:0.5rem;font-size:0.95rem;font-family:inherit;">
+            <option value="hours" selected>horas</option>
+            <option value="days">dias</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc" id="calc">
+      <div class="calc-linha"><span>Parcelado (<span id="cParc">12</span>x de R$ <span id="cMensal">14,90</span>)</span><strong>R$ <span id="cTotal">178,80</span></strong></div>
+      <div class="calc-linha"><span>À vista</span><strong>R$ <span id="cAvista">150,00</span></strong></div>
+      <div class="calc-linha calc-destaque"><span>Economia do à vista</span><strong>R$ <span id="cEcon">28,80</span> = <span id="cPct">16,11%</span></strong></div>
+      <p class="aviso" id="aviso" style="display:none;"></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">2</span> Modo de vendas</h2>
+    <div class="radios">
+      <div class="radio" id="rLive" onclick="setModo('live')">
+        <div class="radio-t">Vendas ativas</div>
+        <div class="radio-d">Botão "Escolher plano" leva ao pagamento.</div>
+      </div>
+      <div class="radio" id="rSoon" onclick="setModo('soon')">
+        <div class="radio-t">Em breve + lista de espera</div>
+        <div class="radio-d">Botão desativado e formulário de e-mail no lugar.</div>
+      </div>
+    </div>
+    <div id="camposSoon" style="margin-top:1rem;display:none;">
+      <div class="campo">
+        <label for="badge">Texto do botão</label>
+        <input type="text" id="badge" value="Em breve" maxlength="30">
+      </div>
+      <div class="campo" style="margin-bottom:0;">
+        <label for="nota">Mensagem acima do formulário</label>
+        <textarea id="nota" rows="2" maxlength="240">As assinaturas ainda não estão abertas. Deixe seu e-mail e avisamos assim que abrirem.</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">3</span> Prévia</h2>
+    <div class="previa">
+      <div class="cartoes">
+        <div class="cartao">
+          <div class="c-nome">Mensal</div>
+          <div class="c-preco">R$ <span id="pMensal">14,90</span> <span>/mês</span></div>
+          <div class="c-per">Cobrado mensalmente</div>
+          <div class="c-btn" id="pBtn1">Escolher plano</div>
+        </div>
+        <div class="cartao pop">
+          <div class="c-nome">Anual</div>
+          <div class="c-preco">R$ <span id="pAnual">150</span> <span>/ano</span></div>
+          <div class="c-per">À vista via PIX • <span id="pParc">12</span>x R$ <span id="pInst">14,90</span> no cartão</div>
+          <div class="c-save" id="pSave">Economize 16,11%</div>
+          <div class="c-btn" id="pBtn2">Escolher plano</div>
+        </div>
+      </div>
+      <p style="font-size:0.72rem;color:#64748b;text-align:center;margin:0.85rem 0 0;">
+        Trial de <span id="pTrial">72 horas</span>. O prazo de 7 dias do CDC não muda — é direito legal, não configuração.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="num">4</span> Publicar</h2>
+    <div class="acoes" style="margin-bottom:1.1rem;">
+      <button class="primario" onclick="baixar()">⬇ Baixar config.json</button>
+      <button class="secundario" onclick="document.getElementById('carregar').click()">Carregar um config.json</button>
+      <input type="file" id="carregar" accept=".json,application/json" style="display:none" onchange="carregarArquivo(this)">
+    </div>
+    <ol class="passos">
+      <li>Clique em <strong>Baixar config.json</strong> acima.</li>
+      <li>Abra o cPanel da HostGator → <strong>Gerenciador de Arquivos</strong> → pasta <code>dalencastro.com</code>.</li>
+      <li>Clique em <strong>Carregar</strong> e envie o <code>config.json</code>, substituindo o que está lá.</li>
+      <li>Abra o site e recarregue. Pronto — os preços novos valem para todos.</li>
+    </ol>
+    <p style="font-size:0.8rem;color:#64748b;margin:1rem 0 0.5rem;">Conteúdo que será gerado:</p>
+    <div class="json" id="previaJson"></div>
+  </div>
+
+</div>
+
+<script>
+  let modo = 'live';
+
+  const $ = id => document.getElementById(id);
+  const moneyFull = v => v.toFixed(2).replace('.', ',');
+  const moneyShort = v => Number.isInteger(v) ? String(v) : moneyFull(v);
+
+  // Espelha a regra da landing: a unidade e escolha sua, nao deducao do codigo.
+  // "72 horas" e "3 dias" sao o mesmo prazo e frases de venda diferentes.
+  function trialLabel(valor, unidade) {
+    if (unidade === 'days') return valor === 1 ? '1 dia' : valor + ' dias';
+    return valor === 1 ? '1 hora' : valor + ' horas';
+  }
+
+  function lerCampos() {
+    return {
+      mensal: parseFloat($('mensal').value) || 0,
+      anual: parseFloat($('anual').value) || 0,
+      parcelas: parseInt($('parcelas').value) || 12,
+      trial: parseInt($('trial').value) || 72,
+      trialUnit: $('trialUnit').value === 'days' ? 'days' : 'hours',
+      badge: $('badge').value.trim() || 'Em breve',
+      nota: $('nota').value.trim()
+    };
+  }
+
+  function montarConfig() {
+    const v = lerCampos();
+    return {
+      _leia_me: 'Gerado pelo painel em admin/index.html. O desconto do plano anual NAO entra aqui: e calculado pelo app a partir dos precos.',
+      version: 1,
+      plans: {
+        monthly: { price: Number(v.mensal.toFixed(2)) },
+        annual: { price: Number(v.anual.toFixed(2)), installments: v.parcelas }
+      },
+      // hours e sempre a fonte canonica (o app calcula o prazo com ela);
+      // unit diz apenas como escrever o prazo na tela.
+      trial: { hours: v.trialUnit === 'days' ? v.trial * 24 : v.trial, unit: v.trialUnit },
+      sales: { mode: modo, soonBadge: v.badge, soonNote: v.nota }
+    };
+  }
+
+  function atualizar() {
+    const v = lerCampos();
+    const total = v.mensal * v.parcelas;
+    const econ = total - v.anual;
+    const pct = total > 0 ? (econ / total) * 100 : 0;
+
+    $('cParc').textContent = v.parcelas;
+    $('cMensal').textContent = moneyFull(v.mensal);
+    $('cTotal').textContent = moneyFull(total);
+    $('cAvista').textContent = moneyFull(v.anual);
+    $('cEcon').textContent = moneyFull(econ);
+    $('cPct').textContent = pct.toFixed(2).replace('.', ',') + '%';
+
+    // O anual so faz sentido se for mais barato que pagar 12 meses. Avisar aqui
+    // e mais barato que descobrir depois que o site anunciou "economize -5%".
+    const ruim = econ <= 0;
+    $('calc').classList.toggle('alerta', ruim);
+    $('aviso').style.display = ruim ? '' : 'none';
+    if (ruim) {
+      $('aviso').textContent = econ === 0
+        ? 'O anual custa o mesmo que o parcelado: não há economia para anunciar. O selo "Economize" some do site.'
+        : 'O anual está MAIS CARO que o parcelado. O selo "Economize" some do site, mas revise os valores.';
+    }
+
+    $('pMensal').textContent = moneyShort(v.mensal);
+    $('pAnual').textContent = moneyShort(v.anual);
+    $('pParc').textContent = v.parcelas;
+    $('pInst').textContent = moneyFull(v.mensal);
+    $('pSave').textContent = 'Economize ' + pct.toFixed(2).replace('.', ',') + '%';
+    $('pSave').style.display = econ > 0 ? '' : 'none';
+    $('pTrial').textContent = trialLabel(v.trial, v.trialUnit);
+
+    const emBreve = modo === 'soon';
+    [$('pBtn1'), $('pBtn2')].forEach(b => {
+      b.textContent = emBreve ? v.badge : 'Escolher plano';
+      b.classList.toggle('off', emBreve);
+    });
+
+    $('previaJson').textContent = JSON.stringify(montarConfig(), null, 2);
+  }
+
+  function setModo(m) {
+    modo = m;
+    $('rLive').classList.toggle('on', m === 'live');
+    $('rSoon').classList.toggle('on', m === 'soon');
+    $('camposSoon').style.display = m === 'soon' ? '' : 'none';
+    atualizar();
+  }
+
+  function baixar() {
+    const blob = new Blob([JSON.stringify(montarConfig(), null, 2) + '\n'], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'config.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function carregarArquivo(input) {
+    const f = input.files[0];
+    if (!f) return;
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      try {
+        const c = JSON.parse(leitor.result);
+        if (c?.plans?.monthly?.price) $('mensal').value = c.plans.monthly.price;
+        if (c?.plans?.annual?.price) $('anual').value = c.plans.annual.price;
+        if (c?.plans?.annual?.installments) $('parcelas').value = c.plans.annual.installments;
+        if (c?.trial?.hours) {
+          const dias = c.trial.unit === 'days';
+          $('trialUnit').value = dias ? 'days' : 'hours';
+          $('trial').value = dias ? c.trial.hours / 24 : c.trial.hours;
+        }
+        if (c?.sales?.soonBadge) $('badge').value = c.sales.soonBadge;
+        if (c?.sales?.soonNote) $('nota').value = c.sales.soonNote;
+        setModo(c?.sales?.mode === 'soon' ? 'soon' : 'live');
+      } catch (e) {
+        alert('Não consegui ler esse arquivo como config.json.\n\n' + e.message);
+      }
+    };
+    leitor.readAsText(f);
+    input.value = '';
+  }
+
+  document.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', atualizar));
+  setModo('live');
+</script>
+</body>
+</html>

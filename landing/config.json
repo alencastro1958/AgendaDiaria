@@ -1,0 +1,14 @@
+{
+  "_leia_me": "Editado pela dashboard em admin/index.html. Nao edite a mao a menos que saiba o que esta fazendo. O desconto do plano anual NAO entra aqui: e calculado pelo app a partir dos precos.",
+  "version": 1,
+  "plans": {
+    "monthly": { "price": 14.90 },
+    "annual": { "price": 150.00, "installments": 12 }
+  },
+  "trial": { "hours": 72, "unit": "hours" },
+  "sales": {
+    "mode": "live",
+    "soonBadge": "Em breve",
+    "soonNote": "As assinaturas ainda nao estao abertas. Deixe seu e-mail e avisamos assim que abrirem."
+  }
+}

@@ -1719,7 +1719,7 @@
       <div class="reg-header">
         <h2>Crie sua conta</h2>
         <p>Seus pensamentos merecem um lugar seguro.</p>
-        <div class="trial-badge">✨ Teste grátis por 72 horas</div>
+        <div class="trial-badge">✨ Teste grátis por <span data-cfg="trialLabel">72 horas</span></div>
       </div>
       <div class="reg-body">
         <div class="reg-field">
@@ -1825,14 +1825,14 @@
       </button>
       <div class="plans-header">
         <h2>Escolha seu plano</h2>
-        <p>72 horas grátis para avaliar. Cancele quando quiser.</p>
+        <p><span data-cfg="trialLabel">72 horas</span> grátis para avaliar. Cancele quando quiser.</p>
       </div>
       <div class="plans-body">
         <div class="plan-cards">
           <!-- Monthly Plan -->
           <div class="plan-card" id="planMonthly">
             <div class="plan-name">Mensal</div>
-            <div class="plan-price">R$ 14,90 <span>/mês</span></div>
+            <div class="plan-price">R$ <span data-cfg="monthlyShort">14,90</span> <span>/mês</span></div>
             <div class="plan-period">Cobrado mensalmente</div>
             <ul class="plan-features">
               <li>Anotações ilimitadas</li>
@@ -1840,24 +1840,41 @@
               <li>Busca por data</li>
               <li>Exportar dados</li>
             </ul>
-            <button class="plan-select" onclick="selectPlan('monthly')">Escolher plano</button>
+            <button class="plan-select" id="planSelectMonthly" onclick="selectPlan('monthly')">Escolher plano</button>
           </div>
           <!-- Annual Plan -->
           <div class="plan-card popular" id="planAnnual">
             <div class="plan-name">Anual</div>
-            <div class="plan-price">R$ 150 <span>/ano</span></div>
-            <div class="plan-period">À vista via PIX • 12x R$ 14,90 no cartão</div>
-            <div class="plan-save">Economize 16,11%</div>
+            <div class="plan-price">R$ <span data-cfg="annualShort">150</span> <span>/ano</span></div>
+            <div class="plan-period">À vista via PIX • <span data-cfg="installments">12</span>x R$ <span data-cfg="installmentValue">14,90</span> no cartão</div>
+            <div class="plan-save">Economize <span data-cfg="savingsPct">16,11%</span></div>
             <ul class="plan-features">
               <li>Tudo do plano mensal</li>
               <li>Prioridade em novidades</li>
               <li>Suporte dedicado</li>
               <li>Acesso antecipado</li>
             </ul>
-            <button class="plan-select" onclick="selectPlan('annual')">Escolher plano</button>
+            <button class="plan-select" id="planSelectAnnual" onclick="selectPlan('annual')">Escolher plano</button>
           </div>
         </div>
-        <p class="plans-note">🔒 Pagamento seguro via PIX ou Cartão de Crédito.<br>72 horas de trial. Cancele a qualquer momento.</p>
+
+        <!-- Lista de espera: aparece so quando sales.mode = "soon" no config.json -->
+        <div id="waitlistSection" style="display:none;margin-top:1.25rem;">
+          <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:0.75rem;padding:1.25rem;">
+            <p id="waitlistNote" style="font-size:0.85rem;color:#92400e;margin:0 0 0.85rem;text-align:center;"></p>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <input id="waitlistEmail" type="email" placeholder="seu@email.com" autocomplete="email"
+                     style="flex:1;min-width:180px;padding:0.7rem;border:1.5px solid #fcd34d;border-radius:0.5rem;font-size:0.9rem;box-sizing:border-box;">
+              <button id="waitlistSubmit" onclick="handleWaitlist()"
+                      style="padding:0.7rem 1.25rem;background:#d97706;color:white;border:none;border-radius:0.5rem;font-size:0.85rem;font-weight:600;cursor:pointer;">Avise-me</button>
+            </div>
+            <p style="font-size:0.7rem;color:#a16207;margin:0.65rem 0 0;text-align:center;">
+              Usamos seu e-mail apenas para avisar da abertura. Nada de spam, e você pode pedir a remoção quando quiser.
+            </p>
+          </div>
+        </div>
+
+        <p class="plans-note" id="plansNoteLive">🔒 Pagamento seguro via PIX ou Cartão de Crédito.<br><span data-cfg="trialLabel">72 horas</span> de trial. Cancele a qualquer momento.</p>
       </div>
     </div>
   </div>
@@ -1870,7 +1887,7 @@
       <p id="paymentPlanSummary" style="text-align:center;color:#64748b;font-size:0.85rem;margin-bottom:1.25rem;"></p>
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:0.5rem;padding:0.65rem 0.85rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:0.5rem;">
         <span style="font-size:1.1rem;flex-shrink:0;">🛡️</span>
-        <div style="font-size:0.78rem;color:#166534;line-height:1.4;"><strong>72 horas de trial grátis.</strong> Você pode cancelar sem custo dentro das 72 horas. Após esse período, a assinatura será efetivada. Você mantém ainda o direito de arrependimento de 7 dias garantido ao consumidor (CDC Art. 49).</div>
+        <div style="font-size:0.78rem;color:#166534;line-height:1.4;"><strong><span data-cfg="trialLabel">72 horas</span> de trial grátis.</strong> Você pode cancelar sem custo dentro desse prazo. Após ele, a assinatura será efetivada. Você mantém ainda o direito de arrependimento de 7 dias garantido ao consumidor (CDC Art. 49).</div>
       </div>
       <div style="display:flex;gap:0.5rem;margin-bottom:1.25rem;">
         <button id="payMethodPIX" onclick="setPaymentMethod('pix')" style="flex:1;padding:0.65rem;border-radius:0.5rem;border:2px solid #16a34a;background:#f0fdf4;color:#166534;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:0.4rem;">PIX</button>
@@ -1879,14 +1896,14 @@
       <div style="display:flex;gap:0.75rem;margin-bottom:1.25rem;">
         <div id="payPlanMonthly" onclick="setPaymentPlan('monthly')" style="flex:1;padding:0.65rem;border-radius:0.75rem;text-align:center;cursor:pointer;border:2px solid #e2e8f0;transition:all 0.2s;">
           <div style="font-weight:600;color:#334155;font-size:0.85rem;">Mensal</div>
-          <div style="font-size:1.05rem;font-weight:700;color:#1e293b;">R$ 14,90</div>
+          <div style="font-size:1.05rem;font-weight:700;color:#1e293b;">R$ <span data-cfg="monthlyFull">14,90</span></div>
           <div style="font-size:0.7rem;color:#94a3b8;">/mês</div>
         </div>
         <div id="payPlanAnnual" onclick="setPaymentPlan('annual')" style="flex:1;padding:0.65rem;border-radius:0.75rem;text-align:center;cursor:pointer;border:2px solid #e2e8f0;transition:all 0.2s;">
           <div style="font-weight:600;color:#334155;font-size:0.85rem;">Anual</div>
-          <div style="font-size:1.05rem;font-weight:700;color:#1e293b;">R$ 150,00</div>
-          <div style="font-size:0.7rem;color:#94a3b8;">à vista • 12x R$ 14,90</div>
-          <div style="font-size:0.65rem;color:#16a34a;font-weight:600;">Economize 16,11%</div>
+          <div style="font-size:1.05rem;font-weight:700;color:#1e293b;">R$ <span data-cfg="annualFull">150,00</span></div>
+          <div style="font-size:0.7rem;color:#94a3b8;">à vista • <span data-cfg="installments">12</span>x R$ <span data-cfg="installmentValue">14,90</span></div>
+          <div style="font-size:0.65rem;color:#16a34a;font-weight:600;">Economize <span data-cfg="savingsPct">16,11%</span></div>
         </div>
       </div>
       <div id="pixSection">
@@ -1930,7 +1947,7 @@
         <select id="payInstallment" style="width:100%;padding:0.7rem;border:1.5px solid #e2e8f0;border-radius:0.5rem;font-size:0.9rem;margin-bottom:1rem;background:white;box-sizing:border-box;"></select>
       </div>
       <button id="paySubmitBtn" onclick="handlePayment()" style="width:100%;padding:0.85rem;background:#d97706;color:white;border:none;border-radius:0.5rem;font-size:1rem;font-weight:600;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#b45309'" onmouseout="this.style.background='#d97706'">Confirmar Assinatura</button>
-      <p style="text-align:center;margin-top:0.75rem;font-size:0.72rem;color:#94a3b8;line-height:1.5;">🔒 Pagamento seguro e criptografado.<br>72 horas de trial. Cancele a qualquer momento.<br>Direito de arrependimento de 7 dias garantido pelo CDC Art. 49.</p>
+      <p style="text-align:center;margin-top:0.75rem;font-size:0.72rem;color:#94a3b8;line-height:1.5;">🔒 Pagamento seguro e criptografado.<br><span data-cfg="trialLabel">72 horas</span> de trial. Cancele a qualquer momento.<br>Direito de arrependimento de 7 dias garantido pelo CDC Art. 49.</p>
     </div>
   </div>
 
@@ -2544,7 +2561,7 @@
         passwordSalt: salt,
         passwordAlgo: PWD_ALGO,
         createdAt: Date.now(),
-        trialEndsAt: Date.now() + (72 * 60 * 60 * 1000)
+        trialEndsAt: Date.now() + (CONFIG.trial.hours * 60 * 60 * 1000)
       };
       saveUser(user);
       startSession(user);
@@ -2646,9 +2663,167 @@
       setTimeout(() => openModal('loginModal'), 600);
     }
 
+    // ── Configuracao (config.json) ──
+    // Precos, prazo de trial e modo de vendas vivem em config.json, editavel pela
+    // dashboard em admin/index.html sem mexer em codigo. Os valores no HTML sao
+    // apenas o padrao: se o config.json faltar ou vier quebrado, o site continua
+    // de pe exibindo o que ja estava la.
+    const CONFIG_PADRAO = {
+      plans: { monthly: { price: 14.90 }, annual: { price: 150.00, installments: 12 } },
+      trial: { hours: 72, unit: 'hours' },
+      sales: { mode: 'live', soonBadge: 'Em breve', soonNote: '' }
+    };
+    let CONFIG = CONFIG_PADRAO;
+
+    function moneyFull(v) { return v.toFixed(2).replace('.', ','); }
+    // O cartao grande mostra "R$ 150", nao "R$ 150,00": centavos zerados somem.
+    function moneyShort(v) { return Number.isInteger(v) ? String(v) : moneyFull(v); }
+
+    // A unidade e escolha do gestor, nao deducao do codigo: 72 horas e 3 dias sao
+    // o mesmo prazo, mas nao a mesma frase de venda. Converter sozinho trocaria o
+    // texto do site sem ninguem pedir.
+    function trialLabel(hours, unit) {
+      const u = unit || (CONFIG && CONFIG.trial && CONFIG.trial.unit) || 'hours';
+      if (u === 'days') {
+        const d = hours / 24;
+        const n = Number.isInteger(d) ? d : Math.round(d * 10) / 10;
+        return n === 1 ? '1 dia' : String(n).replace('.', ',') + ' dias';
+      }
+      return hours === 1 ? '1 hora' : hours + ' horas';
+    }
+
+    // O desconto NUNCA e digitado: e derivado dos dois precos. Foi assim que os
+    // 32,64% antigos sobreviveram a uma troca de preco e passaram a mentir.
+    function planoCalculado(cfg) {
+      const mensal = cfg.plans.monthly.price;
+      const anual = cfg.plans.annual.price;
+      const parcelas = cfg.plans.annual.installments || 12;
+      const totalParcelado = mensal * parcelas;
+      const economia = totalParcelado - anual;
+      const pct = totalParcelado > 0 ? (economia / totalParcelado) * 100 : 0;
+      return { mensal, anual, parcelas, totalParcelado, economia, pct };
+    }
+
+    function aplicarConfig() {
+      const c = planoCalculado(CONFIG);
+      const valores = {
+        trialLabel: trialLabel(CONFIG.trial.hours, CONFIG.trial.unit),
+        monthlyShort: moneyShort(c.mensal),
+        monthlyFull: moneyFull(c.mensal),
+        annualShort: moneyShort(c.anual),
+        annualFull: moneyFull(c.anual),
+        installments: String(c.parcelas),
+        installmentValue: moneyFull(c.mensal),
+        installmentTotal: moneyFull(c.totalParcelado),
+        savingsValue: moneyFull(c.economia),
+        savingsPct: c.pct.toFixed(2).replace('.', ',') + '%'
+      };
+      document.querySelectorAll('[data-cfg]').forEach(el => {
+        const k = el.getAttribute('data-cfg');
+        if (valores[k] !== undefined) el.textContent = valores[k];
+      });
+
+      // Economia negativa significa anual mais caro que o parcelado: nesse caso
+      // anunciar "economize" seria propaganda enganosa, entao o selo some.
+      document.querySelectorAll('.plan-save').forEach(el => {
+        el.style.display = c.economia > 0 ? '' : 'none';
+      });
+
+      aplicarModoVendas();
+    }
+
+    function aplicarModoVendas() {
+      const emBreve = CONFIG.sales.mode === 'soon';
+      const badge = CONFIG.sales.soonBadge || 'Em breve';
+      ['planSelectMonthly', 'planSelectAnnual'].forEach(id => {
+        const b = document.getElementById(id);
+        if (!b) return;
+        if (emBreve) {
+          b.textContent = badge;
+          b.disabled = true;
+          b.style.opacity = '0.55';
+          b.style.cursor = 'default';
+        } else {
+          b.textContent = 'Escolher plano';
+          b.disabled = false;
+          b.style.opacity = '';
+          b.style.cursor = '';
+        }
+      });
+      const sec = document.getElementById('waitlistSection');
+      if (sec) sec.style.display = emBreve ? '' : 'none';
+      const nota = document.getElementById('waitlistNote');
+      if (nota) nota.textContent = CONFIG.sales.soonNote || '';
+      const notaLive = document.getElementById('plansNoteLive');
+      if (notaLive) notaLive.style.display = emBreve ? 'none' : '';
+    }
+
+    async function carregarConfig() {
+      try {
+        // cache-busting: sem isso um config.json em cache serviria precos velhos
+        // depois de o gestor publicar a alteracao.
+        const r = await fetch('config.json?v=' + Date.now(), { cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const raw = await r.json();
+        const c = {
+          plans: {
+            monthly: { price: Number(raw?.plans?.monthly?.price) },
+            annual: { price: Number(raw?.plans?.annual?.price), installments: Number(raw?.plans?.annual?.installments) || 12 }
+          },
+          trial: { hours: Number(raw?.trial?.hours), unit: raw?.trial?.unit === 'days' ? 'days' : 'hours' },
+          sales: {
+            mode: raw?.sales?.mode === 'soon' ? 'soon' : 'live',
+            soonBadge: String(raw?.sales?.soonBadge || 'Em breve'),
+            soonNote: String(raw?.sales?.soonNote || '')
+          }
+        };
+        // Um preco invalido (texto, negativo, ausente) derrubaria a pagina toda de
+        // precos. Melhor manter o padrao e registrar o erro.
+        const ok = c.plans.monthly.price > 0 && c.plans.annual.price > 0 && c.trial.hours > 0;
+        if (!ok) throw new Error('config.json com valores invalidos');
+        CONFIG = c;
+      } catch (e) {
+        console.warn('config.json indisponivel ou invalido; usando os valores padrao.', e);
+        CONFIG = CONFIG_PADRAO;
+      }
+      aplicarConfig();
+    }
+
+    // ── Lista de espera ──
+    async function handleWaitlist() {
+      const campo = document.getElementById('waitlistEmail');
+      const botao = document.getElementById('waitlistSubmit');
+      const email = campo.value.trim();
+      if (!email || !email.includes('@') || !email.includes('.')) {
+        shakeField('waitlistEmail');
+        showToast('Informe um e-mail válido.');
+        return;
+      }
+      botao.disabled = true;
+      const textoOriginal = botao.textContent;
+      botao.textContent = 'Enviando...';
+      try {
+        const r = await fetch('waitlist.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok || !data.ok) throw new Error(data.error || ('HTTP ' + r.status));
+        campo.value = '';
+        showToast('Pronto! Avisaremos você assim que as assinaturas abrirem.');
+      } catch (e) {
+        console.error('Falha ao registrar na lista de espera', e);
+        showToast('Não conseguimos registrar agora. Tente novamente em instantes.');
+      } finally {
+        botao.disabled = false;
+        botao.textContent = textoOriginal;
+      }
+    }
+
     // ── Plan Selection & Payment ──
     let selectedPlan = 'monthly';
-    let selectedPlanPrice = 12;
+    let selectedPlanPrice = CONFIG_PADRAO.plans.monthly.price;
     let paymentMethod = 'pix';
 
     function setPaymentMethod(method) {
@@ -2670,14 +2845,19 @@
 
     function setPaymentPlan(plan) {
       selectedPlan = plan;
-      selectedPlanPrice = plan === 'annual' ? 97 : 12;
+      const c = planoCalculado(CONFIG);
+      selectedPlanPrice = plan === 'annual' ? c.anual : c.mensal;
       openPaymentModal();
     }
 
     function selectPlan(plan) {
+      // No modo "Em breve" os botoes ficam desabilitados, mas selectPlan continua
+      // alcancavel pelo console: a checagem impede abrir a compra por outro caminho.
+      if (CONFIG.sales.mode === 'soon') return;
       closeModal('plansModal');
       selectedPlan = plan;
-      selectedPlanPrice = plan === 'annual' ? 97 : 12;
+      const c = planoCalculado(CONFIG);
+      selectedPlanPrice = plan === 'annual' ? c.anual : c.mensal;
       openPaymentModal();
     }
 
@@ -2686,11 +2866,12 @@
       const monthly = document.getElementById('payPlanMonthly');
       const annual = document.getElementById('payPlanAnnual');
       if (selectedPlan === 'annual') {
-        summary.textContent = 'Plano Anual — R$ 150,00 à vista (PIX) ou 12x R$ 14,90 no cartão (R$ 178,80 total)';
+        const c = planoCalculado(CONFIG);
+        summary.textContent = 'Plano Anual — R$ ' + moneyFull(c.anual) + ' à vista (PIX) ou ' + c.parcelas + 'x R$ ' + moneyFull(c.mensal) + ' no cartão (R$ ' + moneyFull(c.totalParcelado) + ' total)';
         annual.style.borderColor = '#d97706'; annual.style.background = '#fffbeb';
         monthly.style.borderColor = '#e2e8f0'; monthly.style.background = 'white';
       } else {
-        summary.textContent = 'Plano Mensal — R$ 14,90/mês';
+        summary.textContent = 'Plano Mensal — R$ ' + moneyFull(planoCalculado(CONFIG).mensal) + '/mês';
         monthly.style.borderColor = '#d97706'; monthly.style.background = '#fffbeb';
         annual.style.borderColor = '#e2e8f0'; annual.style.background = 'white';
       }
@@ -2708,16 +2889,21 @@
       var sel = document.getElementById('payInstallment');
       if (!sel) return;
       sel.innerHTML = '';
+      var c = planoCalculado(CONFIG);
       if (selectedPlan === 'monthly') {
         var opt = document.createElement('option');
-        opt.value = '1'; opt.textContent = '1x de R$ 14,90 (sem juros)';
+        opt.value = '1'; opt.textContent = '1x de R$ ' + moneyFull(c.mensal) + ' (sem juros)';
         sel.appendChild(opt);
       } else {
         var opt1 = document.createElement('option');
-        opt1.value = '1'; opt1.textContent = '1x de R$ 150,00 (à vista — PIX com 16,11% de desconto)';
+        opt1.value = '1';
+        opt1.textContent = c.economia > 0
+          ? '1x de R$ ' + moneyFull(c.anual) + ' (à vista — PIX com ' + c.pct.toFixed(2).replace('.', ',') + '% de desconto)'
+          : '1x de R$ ' + moneyFull(c.anual) + ' (à vista via PIX)';
         sel.appendChild(opt1);
         var opt12 = document.createElement('option');
-        opt12.value = '12'; opt12.textContent = '12x de R$ 14,90 (sem juros) = R$ 178,80 total';
+        opt12.value = String(c.parcelas);
+        opt12.textContent = c.parcelas + 'x de R$ ' + moneyFull(c.mensal) + ' (sem juros) = R$ ' + moneyFull(c.totalParcelado) + ' total';
         sel.appendChild(opt12);
       }
     }
@@ -2740,22 +2926,24 @@
         if (cpf2.length !== 11) { showToast('CPF inválido','error'); return; }
       }
       var inst = document.getElementById('payInstallment') ? document.getElementById('payInstallment').value : '1';
+      var c = planoCalculado(CONFIG);
       var user = JSON.parse(localStorage.getItem('agendadiaria_user') || 'null');
       if (user) {
         user.plan = selectedPlan;
-        user.planPrice = selectedPlan === 'annual' ? (inst === '1' ? 97 : 144) : 12;
+        user.planPrice = selectedPlan === 'annual' ? (inst === '1' ? c.anual : c.totalParcelado) : c.mensal;
         user.planInstallments = parseInt(inst);
         user.paymentMethod = paymentMethod;
-        user.trialEndsAt = Date.now() + (72 * 60 * 60 * 1000);
+        user.trialEndsAt = Date.now() + (CONFIG.trial.hours * 60 * 60 * 1000);
         user.subscribedAt = new Date().toISOString();
         localStorage.setItem('agendadiaria_user', JSON.stringify(user));
       }
       closeModal('paymentModal');
+      var trial = trialLabel(CONFIG.trial.hours);
       if (paymentMethod === 'pix') {
-        showToast('PIX gerado! Efetue o pagamento em até 30 min. Trial de 72 horas iniciado.');
+        showToast('PIX gerado! Efetue o pagamento em até 30 min. Trial de ' + trial + ' iniciado.');
       } else {
-        var txt = inst + 'x de R$ ' + (selectedPlan === 'annual' ? (inst === '1' ? '150,00' : '14,90') : '14,90');
-        showToast('Assinatura confirmada! ' + txt + ' — Trial de 72 horas iniciado!');
+        var txt = inst + 'x de R$ ' + moneyFull(selectedPlan === 'annual' && inst === '1' ? c.anual : c.mensal);
+        showToast('Assinatura confirmada! ' + txt + ' — Trial de ' + trial + ' iniciado!');
       }
     }
 
@@ -3258,6 +3446,10 @@
     // aceita os dois formatos, entao um login durante a migracao funciona.
     migrateLegacyPasswords().catch(e => console.error('Falha ao migrar senhas', e));
     restoreSession();
+    // aplicarConfig() roda antes do fetch para que os valores padrao ja aparecam
+    // formatados; carregarConfig() sobrescreve quando o config.json chega.
+    aplicarConfig();
+    carregarConfig();
   </script>
 
 </body>

@@ -30,6 +30,20 @@
   RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
 </IfModule>
 
+# A lista de espera guarda e-mails, que sao dados pessoais. O waitlist.php tenta
+# grava-la fora da pasta publica; este bloco e a segunda linha de defesa, para o
+# caso de ela acabar aqui dentro. Sem isso, a lista seria baixavel por qualquer
+# pessoa que adivinhasse o nome do arquivo.
+<Files "lista-espera.csv">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</Files>
+
 # O SQLite roda em WebAssembly: sem este tipo o navegador recusa a compilacao
 # em streaming e cai num caminho mais lento, quando nao falha.
 <IfModule mod_mime.c>
