@@ -1,0 +1,5 @@
+# Arquivos de configuracao do servidor devem sair sempre com LF, mesmo em
+# Windows com core.autocrlf=true. O Apache tolera CRLF na maior parte dos
+# casos, mas o deploy vem de checkout desta arvore e nao vale correr o risco.
+.htaccess text eol=lf
+*.conf text eol=lf
