@@ -1771,7 +1771,46 @@
         </div>
         <button class="reg-submit" onclick="handleLogin()">Entrar</button>
         <div class="reg-footer">
+          <a href="#" onclick="closeModal('loginModal'); openModal('resetModal'); return false;">Esqueceu sua senha?</a>
+        </div>
+        <div class="reg-footer">
           Não tem conta? <a href="#" onclick="closeModal('loginModal'); openModal('regModal'); return false;">Cadastre-se grátis</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ Reset Password Modal ═══════════ -->
+  <div class="modal-overlay reg-modal" id="resetModal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeModal('resetModal')" aria-label="Fechar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <div class="reg-header">
+        <h2>Redefinir senha</h2>
+        <p>Confirme seu CPF para criar uma nova senha. Suas anotações não são afetadas.</p>
+      </div>
+      <div class="reg-body">
+        <div class="reg-field">
+          <label for="resetIdentifier">E-mail ou Login</label>
+          <input type="text" id="resetIdentifier" placeholder="Digite seu e-mail ou login" autocomplete="username">
+        </div>
+        <div class="reg-field">
+          <label for="resetCPF">CPF cadastrado</label>
+          <input type="text" id="resetCPF" placeholder="000.000.000-00" maxlength="14" class="cpf-input" inputmode="numeric">
+          <span class="reg-field-error" id="resetCPFError"></span>
+        </div>
+        <div class="reg-field">
+          <label for="resetPassword">Nova senha</label>
+          <input type="password" id="resetPassword" placeholder="Crie uma nova senha" autocomplete="new-password">
+        </div>
+        <div class="reg-field">
+          <label for="resetPassword2">Confirme a nova senha</label>
+          <input type="password" id="resetPassword2" placeholder="Repita a nova senha" autocomplete="new-password">
+        </div>
+        <button class="reg-submit" onclick="handleResetPassword()">Redefinir senha</button>
+        <div class="reg-footer">
+          Lembrou? <a href="#" onclick="closeModal('resetModal'); openModal('loginModal'); return false;">Entrar</a>
         </div>
       </div>
     </div>
@@ -2310,6 +2349,16 @@
       });
     }
 
+    // Mascara no CPF da redefinicao. Sem validacao de digito aqui: o que importa
+    // e conferir com o CPF ja gravado, e um CPF invalido simplesmente nao confere.
+    const resetCpfInput = document.getElementById('resetCPF');
+    if (resetCpfInput) {
+      resetCpfInput.addEventListener('input', function() {
+        this.value = formatCPF(this.value);
+        document.getElementById('resetCPFError').classList.remove('visible');
+      });
+    }
+
     // ── User Storage (localStorage) ──
     function getUsers() {
       try { return JSON.parse(localStorage.getItem('agendadiaria_users') || '[]'); }
@@ -2319,7 +2368,18 @@
     function saveUser(user) {
       const users = getUsers();
       users.push(user);
+      saveUsers(users);
+    }
+
+    function saveUsers(users) {
       localStorage.setItem('agendadiaria_users', JSON.stringify(users));
+    }
+
+    // btoa() lanca InvalidCharacterError com qualquer caractere acima de Latin-1
+    // (€, emoji, cirilico). Retorna null nesses casos em vez de estourar.
+    function encodePassword(password) {
+      try { return btoa(password); }
+      catch { return null; }
     }
 
     function findUser(identifier) {
@@ -2373,13 +2433,20 @@
         return;
       }
 
+      const encoded = encodePassword(password);
+      if (encoded === null) {
+        shakeField('regPassword');
+        showToast('Sua senha tem caracteres não suportados. Use letras, números e acentos comuns.');
+        return;
+      }
+
       // Save user
       const user = {
         name,
         cpf: cpf.replace(/\D/g, ''),
         email,
         login,
-        password: btoa(password),
+        password: encoded,
         createdAt: Date.now(),
         trialEndsAt: Date.now() + (72 * 60 * 60 * 1000)
       };
@@ -2404,8 +2471,8 @@
       const identifier = document.getElementById('loginEmail').value.trim();
       const password = document.getElementById('loginPassword').value;
 
-      if (!identifier) { shakeField('loginEmail'); return; }
-      if (!password) { shakeField('loginPassword'); return; }
+      if (!identifier) { shakeField('loginEmail'); showToast('Informe seu e-mail ou login.'); return; }
+      if (!password) { shakeField('loginPassword'); showToast('Informe sua senha.'); return; }
 
       const user = findUser(identifier);
       if (!user) {
@@ -2414,9 +2481,9 @@
         return;
       }
 
-      if (user.password !== btoa(password)) {
+      if (user.password !== encodePassword(password)) {
         shakeField('loginPassword');
-        showToast('Senha incorreta. Tente novamente.');
+        showToast('Senha incorreta. Tente novamente. Se esqueceu, use "Esqueceu sua senha?".');
         return;
       }
 
@@ -2427,6 +2494,59 @@
 
       // Show app after login
       setTimeout(() => showApp(), 400);
+    }
+
+    // ── Password Reset (local) ──
+    // Sem servidor nao ha e-mail de recuperacao: a conferencia possivel e o CPF
+    // do cadastro. A senha nao cifra as anotacoes, entao redefinir nao perde dados.
+    function handleResetPassword() {
+      const identifier = document.getElementById('resetIdentifier').value.trim();
+      const cpf = document.getElementById('resetCPF').value.trim();
+      const password = document.getElementById('resetPassword').value;
+      const password2 = document.getElementById('resetPassword2').value;
+      const cpfError = document.getElementById('resetCPFError');
+      cpfError.classList.remove('visible');
+
+      if (!identifier) { shakeField('resetIdentifier'); showToast('Informe seu e-mail ou login.'); return; }
+
+      const users = getUsers();
+      const index = users.findIndex(u =>
+        u.email.toLowerCase() === identifier.toLowerCase() ||
+        u.login.toLowerCase() === identifier.toLowerCase()
+      );
+      if (index === -1) {
+        shakeField('resetIdentifier');
+        showToast('Não encontramos essa conta neste navegador. Verifique o e-mail/login ou cadastre-se.');
+        return;
+      }
+
+      if (users[index].cpf !== cpf.replace(/\D/g, '')) {
+        shakeField('resetCPF');
+        cpfError.textContent = 'O CPF não confere com o desta conta';
+        cpfError.classList.add('visible');
+        return;
+      }
+
+      if (password.length < 6) { shakeField('resetPassword'); showToast('A senha precisa ter pelo menos 6 caracteres.'); return; }
+      if (password !== password2) { shakeField('resetPassword2'); showToast('As senhas não coincidem.'); return; }
+
+      const encoded = encodePassword(password);
+      if (encoded === null) {
+        shakeField('resetPassword');
+        showToast('Sua senha tem caracteres não suportados. Use letras, números e acentos comuns.');
+        return;
+      }
+
+      users[index].password = encoded;
+      saveUsers(users);
+
+      closeModal('resetModal');
+      showToast('Senha redefinida! Entre com a nova senha.');
+      ['resetIdentifier', 'resetCPF', 'resetPassword', 'resetPassword2'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      setTimeout(() => openModal('loginModal'), 600);
     }
 
     // ── Plan Selection & Payment ──
