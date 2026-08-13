@@ -63,3 +63,13 @@ temp/
 # config.json baixado pelo painel (admin/index.html) cai na raiz conforme a
 # pasta de downloads do navegador. O arquivo do projeto e landing/config.json.
 /config.json
+
+# Keys and Signatures (Never commit android keystore)
+*.jks
+*.keystore
+*.der
+
+# Agent & Temp Backups
+.claude/
+scratch/
+*.zip

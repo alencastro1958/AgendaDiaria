@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "br.com.alencastro.agendadiaria",
+      "sha256_cert_fingerprints": [
+        "9A:BE:35:51:A2:2F:FA:29:5B:EA:BA:15:DC:6E:A2:B5:5E:C8:41:58:19:41:14:E6:D8:4E:1D:19:ED:92:CD:1C"
+      ]
+    }
+  }
+]

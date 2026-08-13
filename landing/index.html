@@ -17,6 +17,15 @@
 <meta name="apple-mobile-web-app-title" content="AgendaDiária">
 <link href="vendor/fonts.css" rel="stylesheet">
 <script src="vendor/tailwindcss-browser.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('./sw.js')
+        .then(function(reg) { console.log('[PWA] Service Worker registrado com sucesso:', reg.scope); })
+        .catch(function(err) { console.error('[PWA] Falha ao registrar Service Worker:', err); });
+    });
+  }
+</script>
 <style>
   :root {
     --ink: #1a1625;
